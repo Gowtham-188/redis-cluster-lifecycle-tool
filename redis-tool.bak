@@ -1,0 +1,26 @@
+#!/bin/bash
+
+INVENTORY="ansible/inventory/hosts.ini"
+
+case "$1" in
+  provision)
+
+    echo "Checking prerequisites..."
+
+    docker --version || exit 1
+    ansible-playbook --version || exit 1
+
+    echo "Provisioning Redis Cluster..."
+
+    ansible-playbook -i $INVENTORY ansible/playbooks/provision.yml
+
+    echo "Cluster Topology:"
+    docker exec -it redis-node-1 redis-cli cluster nodes
+
+    ;;
+
+  *)
+    echo "Usage:"
+    echo "./redis-tool provision --version 7.0.15 --masters 3 --replicas-per-master 1"
+    ;;
+esac

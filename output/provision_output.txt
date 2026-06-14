@@ -1,0 +1,38 @@
+Checking prerequisites...
+Docker version 29.5.3, build d1c06ef
+ansible-playbook [core 2.20.1]
+  config file = None
+  configured module search path = ['/home/gowtham/.ansible/plugins/modules', '/usr/share/ansible/plugins/modules']
+  ansible python module location = /usr/lib/python3/dist-packages/ansible
+  ansible collection location = /home/gowtham/.ansible/collections:/usr/share/ansible/collections
+  executable location = /usr/bin/ansible-playbook
+  python version = 3.14.4 (main, Apr  8 2026, 04:02:31) [GCC 15.2.0] (/usr/bin/python3)
+  jinja version = 3.1.6
+  pyyaml version = 6.0.3 (with libyaml v0.2.5)
+Provisioning Redis Cluster...
+
+PLAY [Install Redis] ***********************************************************
+
+TASK [Gathering Facts] *********************************************************
+[ERROR]: Task failed: Failed to connect to the host via ssh: ssh: connect to host 127.0.0.1 port 2221: Connection refused
+fatal: [redis-node-1]: UNREACHABLE! => {"changed": false, "msg": "Task failed: Failed to connect to the host via ssh: ssh: connect to host 127.0.0.1 port 2221: Connection refused", "unreachable": true}
+[ERROR]: Task failed: Failed to connect to the host via ssh: ssh: connect to host 127.0.0.1 port 2222: Connection refused
+fatal: [redis-node-2]: UNREACHABLE! => {"changed": false, "msg": "Task failed: Failed to connect to the host via ssh: ssh: connect to host 127.0.0.1 port 2222: Connection refused", "unreachable": true}
+[ERROR]: Task failed: Failed to connect to the host via ssh: ssh: connect to host 127.0.0.1 port 2223: Connection refused
+fatal: [redis-node-3]: UNREACHABLE! => {"changed": false, "msg": "Task failed: Failed to connect to the host via ssh: ssh: connect to host 127.0.0.1 port 2223: Connection refused", "unreachable": true}
+[ERROR]: Task failed: Failed to connect to the host via ssh: ssh: connect to host 127.0.0.1 port 2224: Connection refused
+fatal: [redis-node-4]: UNREACHABLE! => {"changed": false, "msg": "Task failed: Failed to connect to the host via ssh: ssh: connect to host 127.0.0.1 port 2224: Connection refused", "unreachable": true}
+[ERROR]: Task failed: Failed to connect to the host via ssh: ssh: connect to host 127.0.0.1 port 2225: Connection refused
+fatal: [redis-node-5]: UNREACHABLE! => {"changed": false, "msg": "Task failed: Failed to connect to the host via ssh: ssh: connect to host 127.0.0.1 port 2225: Connection refused", "unreachable": true}
+[ERROR]: Task failed: Failed to connect to the host via ssh: ssh: connect to host 127.0.0.1 port 2226: Connection refused
+fatal: [redis-node-6]: UNREACHABLE! => {"changed": false, "msg": "Task failed: Failed to connect to the host via ssh: ssh: connect to host 127.0.0.1 port 2226: Connection refused", "unreachable": true}
+
+PLAY RECAP *********************************************************************
+redis-node-1               : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0   
+redis-node-2               : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0   
+redis-node-3               : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0   
+redis-node-4               : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0   
+redis-node-5               : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0   
+redis-node-6               : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0   
+
+Cluster Topology:

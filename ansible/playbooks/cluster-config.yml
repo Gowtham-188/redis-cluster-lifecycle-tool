@@ -1,0 +1,48 @@
+---
+- name: Configure Redis Cluster
+  hosts: redis_nodes
+  become: yes
+
+  tasks:
+
+    - name: Enable cluster mode
+      replace:
+        path: /etc/redis/redis.conf
+        regexp: '^# cluster-enabled yes'
+        replace: 'cluster-enabled yes'
+
+    - name: Set cluster config file
+      replace:
+        path: /etc/redis/redis.conf
+        regexp: '^# cluster-config-file nodes.conf'
+        replace: 'cluster-config-file nodes.conf'
+
+    - name: Set cluster timeout
+      replace:
+        path: /etc/redis/redis.conf
+        regexp: '^# cluster-node-timeout 15000'
+        replace: 'cluster-node-timeout 5000'
+
+    - name: Disable protected mode
+      replace:
+        path: /etc/redis/redis.conf
+        regexp: '^protected-mode yes'
+        replace: 'protected-mode no'
+
+    - name: Change bind address
+      replace:
+        path: /etc/redis/redis.conf
+        regexp: '^bind 127.0.0.1 ::1'
+        replace: 'bind 0.0.0.0'
+
+    - name: Enable appendonly
+      replace:
+        path: /etc/redis/redis.conf
+        regexp: '^appendonly no'
+        replace: 'appendonly yes'
+
+    - name: Restart Redis
+      shell: |
+        pkill redis-server || true
+        redis-server /etc/redis/redis.conf --daemonize yes
+

@@ -1,0 +1,36 @@
+---
+- name: Install Redis 7.0.15
+  hosts: redis_nodes
+  become: yes
+
+  tasks:
+
+    - name: Install dependencies
+      apt:
+        name:
+          - wget
+          - build-essential
+          - tcl
+        state: present
+        update_cache: yes
+
+    - name: Download Redis 7.0.15
+      get_url:
+        url: https://download.redis.io/releases/redis-7.0.15.tar.gz
+        dest: /tmp/redis-7.0.15.tar.gz
+
+    - name: Extract Redis
+      unarchive:
+        src: /tmp/redis-7.0.15.tar.gz
+        dest: /tmp
+        remote_src: yes
+
+    - name: Build Redis
+      shell: |
+        cd /tmp/redis-7.0.15
+        make
+
+    - name: Install Redis
+      shell: |
+        cd /tmp/redis-7.0.15
+        make install

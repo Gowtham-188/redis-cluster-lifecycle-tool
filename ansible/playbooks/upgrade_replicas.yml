@@ -1,0 +1,53 @@
+---
+- name: Upgrade Redis Replicas
+  hosts: replicas
+  gather_facts: no
+  serial: 1
+  become: yes
+  tasks:
+
+    - name: Show current node
+      debug:
+        msg: "Upgrading {{ inventory_hostname }}"
+
+    - name: Check Redis version
+      shell: redis-server --version
+      register: redis_version
+
+    - name: Display version
+      debug:
+        var: redis_version.stdout
+
+    - name: Check cluster state
+      shell: redis-cli cluster info | grep cluster_state
+      register: cluster_state
+
+    - name: Display cluster state
+      debug:
+        var: cluster_state.stdout
+
+    - name: Stop Redis
+      service:
+        name: redis-server
+        state: stopped
+
+    - name: Wait 5 seconds
+      pause:
+        seconds: 5
+
+    - name: Start Redis
+      service:
+        name: redis-server
+        state: started
+
+    - name: Wait 10 seconds for cluster rejoin
+      pause:
+        seconds: 10
+
+    - name: Verify cluster state after restart
+      shell: redis-cli cluster info | grep cluster_state
+      register: cluster_state_after
+
+    - name: Display cluster state after restart
+      debug:
+        var: cluster_state_after.stdout

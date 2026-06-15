@@ -1,0 +1,8 @@
+---
+- hosts: masters[0]
+  gather_facts: no
+
+  tasks:
+    - debug:
+        msg: "Post upgrade verification"
+

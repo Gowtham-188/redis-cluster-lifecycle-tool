@@ -1,23 +1,12 @@
 ---
-- name: Rolling Upgrade Redis Cluster
-  hosts: localhost
-  gather_facts: no
+- import_playbook: precheck.yml
 
-  tasks:
+- import_playbook: upgrade_replicas_v2.yml
 
-    - name: Pre-flight check
-      debug:
-        msg: "Checking cluster health"
+- import_playbook: upgrade_master_node5.yml
 
-    - name: Upgrade replicas
-      debug:
-        msg: "Upgrading replicas"
+- import_playbook: upgrade_master_node2.yml
 
-    - name: Upgrade masters
-      debug:
-        msg: "Upgrading masters"
+- import_playbook: upgrade_master_node3.yml
 
-    - name: Post verification
-      debug:
-
-        msg: "Upgrade completed"
+- import_playbook: postcheck.yml

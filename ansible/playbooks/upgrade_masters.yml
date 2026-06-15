@@ -1,0 +1,7 @@
+---
+- hosts: masters
+  gather_facts: no
+
+  tasks:
+    - debug:
+        msg: "Master upgrade phase"

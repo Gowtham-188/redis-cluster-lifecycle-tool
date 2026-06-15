@@ -1,0 +1,58 @@
+---
+- name: Upgrade Old Master redis-node-5
+  hosts: redis-node-5
+  become: yes
+  gather_facts: no
+
+  vars:
+    redis_version: "7.2.6"
+
+  tasks:
+
+    - name: Stop Redis
+      shell: pkill redis-server || true
+
+    - name: Download Redis
+      get_url:
+        url: "https://download.redis.io/releases/redis-{{ redis_version }}.tar.gz"
+        dest: "/tmp/redis-{{ redis_version }}.tar.gz"
+
+    - name: Extract Redis
+      unarchive:
+        src: "/tmp/redis-{{ redis_version }}.tar.gz"
+        dest: /tmp
+        remote_src: yes
+
+    - name: Build Redis
+      shell: |
+        cd /tmp/redis-{{ redis_version }}
+        make
+
+    - name: Install Redis
+      shell: |
+        cd /tmp/redis-{{ redis_version }}
+        make install
+
+    - name: Start Redis
+      shell: |
+        redis-server /etc/redis/redis.conf
+
+    - name: Wait
+      pause:
+        seconds: 10
+
+    - name: Verify Version
+      shell: redis-server --version
+      register: version_out
+
+    - name: Show Version
+      debug:
+        var: version_out.stdout
+
+    - name: Verify Cluster
+      shell: redis-cli cluster info | grep cluster_state
+      register: cluster_out
+
+    - name: Show Cluster
+      debug:
+        var: cluster_out.stdout

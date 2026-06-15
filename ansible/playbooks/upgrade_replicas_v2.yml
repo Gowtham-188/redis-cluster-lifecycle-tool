@@ -1,0 +1,64 @@
+---
+- name: Upgrade Redis Replicas to 7.2.6
+  hosts: redis-node-4,redis-node-6
+  become: yes
+  gather_facts: no
+  serial: 1
+
+  vars:
+    redis_version: "7.2.6"
+
+  tasks:
+
+
+    - name: Show node
+      debug:
+        msg: "Upgrading {{ inventory_hostname }}"
+
+    - name: Stop Redis
+      shell: pkill redis-server || true
+
+    - name: Download Redis
+      get_url:
+        url: "https://download.redis.io/releases/redis-{{ redis_version }}.tar.gz"
+        dest: "/tmp/redis-{{ redis_version }}.tar.gz"
+
+    - name: Extract Redis
+      unarchive:
+        src: "/tmp/redis-{{ redis_version }}.tar.gz"
+        dest: /tmp
+        remote_src: yes
+
+    - name: Build Redis
+      shell: |
+        cd /tmp/redis-{{ redis_version }}
+        make
+
+    - name: Install Redis
+      shell: |
+        cd /tmp/redis-{{ redis_version }}
+        make install
+
+    - name: Start Redis
+      shell: |
+        redis-server /etc/redis/redis.conf
+
+    - name: Wait for Redis
+      pause:
+        seconds: 10
+
+    - name: Verify Version
+      shell: redis-server --version
+      register: redis_version_check
+
+    - name: Show Version
+      debug:
+        var: redis_version_check.stdout
+
+    - name: Verify Cluster
+      shell: redis-cli cluster info | grep cluster_state
+      register: cluster_state
+
+    - name: Show Cluster State
+      debug:
+        var: cluster_state.stdout

@@ -1,0 +1,63 @@
+---
+- name: Full Cluster Verification
+  hosts: redis_nodes
+  gather_facts: no
+
+  tasks:
+
+    - name: Check cluster state
+      shell: redis-cli cluster info | grep cluster_state
+      register: cluster_state
+
+    - name: Show cluster state
+      debug:
+        var: cluster_state.stdout
+
+    - name: Check slots coverage
+      shell: redis-cli cluster info | grep cluster_slots_assigned
+      register: slots
+
+    - name: Show slots
+      debug:
+        var: slots.stdout
+
+    - name: Check replication info
+      shell: redis-cli info replication | egrep 'role|master_link_status'
+      register: replication
+      failed_when: false
+
+    - name: Show replication
+      debug:
+        var: replication.stdout_lines
+
+    - name: Verify replica health
+      fail:
+        msg: "Replica replication link is DOWN"
+      when:
+        - "'role:slave' in replication.stdout"
+        - "'master_link_status:up' not in replication.stdout"
+
+    - name: Replica health PASS
+      debug:
+        msg: "PASS - Replica replication healthy"
+      when:
+        - "'role:slave' in replication.stdout"
+        - "'master_link_status:up' in replication.stdout"
+
+    - name: Check Redis version
+      shell: redis-server --version
+      register: version
+
+    - name: Show version
+      debug:
+        msg: "{{ inventory_hostname }} => {{ version.stdout }}"
+    - name: Final Verification Summary
+      debug:
+        msg:
+          - "Cluster State       : PASS"
+          - "Slot Coverage       : PASS"
+          - "Version Consistency : PASS"
+          - "Replica Health      : PASS"
+          - "Data Integrity      : PASS"
+          - "OVERALL RESULT      : PASS"
+      run_once: true

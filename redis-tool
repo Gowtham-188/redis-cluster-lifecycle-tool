@@ -54,36 +54,36 @@ case "$1" in
 
     ;;
 
-  status)
+status)
 
-    echo "Cluster State:"
-    ansible redis-node-1 -i $INVENTORY -m shell -a \
-    "redis-cli cluster info | grep cluster_state"
+  ./scripts/status.sh
 
-    echo ""
-    echo "MASTERS"
+  ;;
+  verify)
 
-    echo "10.10.0.15:6379 [master] v7.0.15 slots: 0-5460 keys: 334 mem: 1.96M"
-    echo "10.10.0.12:6379 [master] v7.0.15 slots: 5461-10922 keys: 324 mem: 1.93M"
-    echo "10.10.0.13:6379 [master] v7.0.15 slots: 10923-16383 keys: 343 mem: 1.94M"
+  echo "Running Full Cluster Verification..."
+  echo ""
 
-    echo ""
-    echo "REPLICAS"
+  ansible-playbook \
+  -i $INVENTORY \
+  ansible/playbooks/verify_full.yml
 
-    echo "10.10.0.11:6379 [replica] v7.0.15 replicating: 10.10.0.15:6379 mem: 1.94M"
-    echo "10.10.0.14:6379 [replica] v7.0.15 replicating: 10.10.0.13:6379 mem: 1.85M"
-    echo "10.10.0.16:6379 [replica] v7.0.15 replicating: 10.10.0.12:6379 mem: 1.84M"
-
-    ;;
+  ;;
 
       upgrade)
 
-    echo "Starting Rolling Upgrade..."
+  echo "Starting Rolling Upgrade..."
 
-    ansible-playbook ansible/playbooks/upgrade.yml
+  ansible-playbook \
+  -i $INVENTORY \
+  ansible/playbooks/upgrade.yml
 
-    ;;
+  echo ""
+  echo "Running Final Verification..."
 
+  ./redis-tool data verify | tee output/upgrade_output.txt
+
+  ;;
 
   *)
 

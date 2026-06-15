@@ -1,0 +1,12 @@
+---
+- name: Pre Upgrade Checks
+  import_playbook: precheck.yml
+
+- name: Upgrade Replicas
+  import_playbook: upgrade_replicas.yml
+
+- name: Upgrade Masters
+  import_playbook: upgrade_masters.yml
+
+- name: Post Upgrade Verification
+  import_playbook: postcheck.yml

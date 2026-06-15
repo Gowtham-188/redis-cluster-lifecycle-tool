@@ -1,0 +1,22 @@
+---
+- name: Redis Cluster Precheck
+  hosts: masters[0]
+  gather_facts: no
+
+  tasks:
+
+    - name: Check cluster state
+      shell: redis-cli cluster info | grep cluster_state
+      register: cluster_state
+
+    - name: Show cluster state
+      debug:
+        msg: "{{ cluster_state.stdout }}"
+
+    - name: Check Redis version
+      shell: redis-server --version
+      register: precheck_redis_version
+
+    - name: Show version
+      debug:
+        msg: "{{ precheck_redis_version.stdout }}"

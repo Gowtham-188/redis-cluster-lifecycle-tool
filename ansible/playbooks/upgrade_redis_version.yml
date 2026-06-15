@@ -1,0 +1,40 @@
+---
+- hosts: replicas
+  become: yes
+  serial: 1
+
+  vars:
+    redis_version: "7.2.6"
+
+  tasks:
+
+    - name: Stop Redis
+      service:
+        name: redis-server
+        state: stopped
+
+    - name: Download Redis
+      get_url:
+        url: "https://download.redis.io/releases/redis-{{ redis_version }}.tar.gz"
+        dest: "/tmp/redis-{{ redis_version }}.tar.gz"
+
+    - name: Extract Redis
+      unarchive:
+        src: "/tmp/redis-{{ redis_version }}.tar.gz"
+        dest: /tmp
+        remote_src: yes
+
+    - name: Build Redis
+      shell: |
+        cd /tmp/redis-{{ redis_version }}
+        make
+
+    - name: Install Redis
+      shell: |
+        cd /tmp/redis-{{ redis_version }}
+        make install
+
+    - name: Start Redis
+      service:
+        name: redis-server
+        state: started

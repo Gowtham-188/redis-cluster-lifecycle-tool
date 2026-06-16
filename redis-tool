@@ -2,18 +2,45 @@
 
 INVENTORY="ansible/inventory/hosts.ini"
 
+
+LOG_DIR="logs"
+mkdir -p $LOG_DIR
+
+log_event() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') | $1" >> $LOG_DIR/redis-tool.log
+}
+
 case "$1" in
 
   provision)
+
+
+    log_event "PROVISION_START"
+
 
     echo "Checking prerequisites..."
 
     docker --version || exit 1
     ansible-playbook --version || exit 1
 
+    echo "Checking existing cluster..."
+
+    CLUSTER_STATE=$(ansible redis-node-1 \
+    -i $INVENTORY \
+    -m shell \
+    -a "redis-cli cluster info 2>/dev/null | grep cluster_state" \
+    -o 2>/dev/null)
+
+    if echo "$CLUSTER_STATE" | grep -q "cluster_state:ok"; then
+        log_event "PROVISION_SKIPPED_ALREADY_EXISTS"
+        echo "Cluster already provisioned."
+        echo "No changes required."
+        exit 0
+    fi
     echo "Provisioning Redis Cluster..."
 
     ansible-playbook -i $INVENTORY ansible/playbooks/provision.yml
+    log_event "PROVISION_SUCCESS"
 
     echo "Cluster Topology:"
     docker exec redis-node-1 redis-cli cluster nodes
@@ -24,23 +51,33 @@ case "$1" in
 
     case "$2" in
 
-      seed)
+            seed)
 
         echo "Seeding data into Redis Cluster..."
+
+        log_event "DATA_SEED_START"
 
         ssh -i ~/.ssh/redis_cluster_key -p 2221 redis@localhost \
         "python3 ~/scripts/seed_data.py"
 
-        ;;
-
-      verify)
-
-        echo "Verifying data..."
-
-        ssh -i ~/.ssh/redis_cluster_key -p 2221 redis@localhost \
-        "python3 ~/scripts/verify_data.py"
+        log_event "DATA_SEED_SUCCESS"
 
         ;;
+
+            verify)
+
+              log_event "FULL_VERIFY_START"
+
+              echo "Running Full Cluster Verification..."
+              echo ""
+
+              ansible-playbook \
+              -i $INVENTORY \
+              ansible/playbooks/verify_full.yml
+ 
+              log_event "FULL_VERIFY_SUCCESS"
+
+       ;;
 
       *)
 
@@ -61,6 +98,9 @@ status)
   ;;
   verify)
 
+   
+  log_event "FULL_VERIFY_START"
+
   echo "Running Full Cluster Verification..."
   echo ""
 
@@ -68,15 +108,38 @@ status)
   -i $INVENTORY \
   ansible/playbooks/verify_full.yml
 
+
+  log_event "FULL_VERIFY_SUCCESS"
+
   ;;
 
       upgrade)
+
+  log_event "UPGRADE_CHECK"
+
+  echo "Checking current Redis versions..."
+
+  CURRENT=$(ansible redis_nodes \
+  -i $INVENTORY \
+  -m shell \
+  -a "redis-cli INFO server | grep redis_version" \
+  -o)
+
+  if ! echo "$CURRENT" | grep -v "redis_version:7.2.6" >/dev/null; then
+    log_event "UPGRADE_SKIPPED_ALREADY_AT_TARGET"
+    echo "All nodes already running Redis 7.2.6"
+    echo "Nothing to upgrade."
+    exit 0
+  fi
+  log_event "UPGRADE_START"
 
   echo "Starting Rolling Upgrade..."
 
   ansible-playbook \
   -i $INVENTORY \
   ansible/playbooks/upgrade.yml
+
+  log_event "UPGRADE_SUCCESS"
 
   echo ""
   echo "Running Final Verification..."

@@ -1,0 +1,100 @@
+#!/bin/bash
+
+INVENTORY="ansible/inventory/hosts.ini"
+
+case "$1" in
+
+  provision)
+
+    echo "Checking prerequisites..."
+
+    docker --version || exit 1
+    ansible-playbook --version || exit 1
+
+    echo "Provisioning Redis Cluster..."
+
+    ansible-playbook -i $INVENTORY ansible/playbooks/provision.yml
+
+    echo "Cluster Topology:"
+    docker exec redis-node-1 redis-cli cluster nodes
+
+    ;;
+
+  data)
+
+    case "$2" in
+
+      seed)
+
+        echo "Seeding data into Redis Cluster..."
+
+        ssh -i ~/.ssh/redis_cluster_key -p 2221 redis@localhost \
+        "python3 ~/scripts/seed_data.py"
+
+        ;;
+
+      verify)
+
+        echo "Verifying data..."
+
+        ssh -i ~/.ssh/redis_cluster_key -p 2221 redis@localhost \
+        "python3 ~/scripts/verify_data.py"
+
+        ;;
+
+      *)
+
+        echo "Usage:"
+        echo "./redis-tool data seed --keys 1000"
+        echo "./redis-tool data verify"
+
+        ;;
+
+    esac
+
+    ;;
+
+status)
+
+  ./scripts/status.sh
+
+  ;;
+  verify)
+
+  echo "Running Full Cluster Verification..."
+  echo ""
+
+  ansible-playbook \
+  -i $INVENTORY \
+  ansible/playbooks/verify_full.yml
+
+  ;;
+
+      upgrade)
+
+  echo "Starting Rolling Upgrade..."
+
+  ansible-playbook \
+  -i $INVENTORY \
+  ansible/playbooks/upgrade.yml
+
+  echo ""
+  echo "Running Final Verification..."
+
+  ./redis-tool data verify | tee output/upgrade_output.txt
+
+  ;;
+
+  *)
+
+
+    echo "Usage:"
+    echo "./redis-tool provision --version 7.0.15 --masters 3 --replicas-per-master 1"
+    echo "./redis-tool data seed --keys 1000"
+    echo "./redis-tool data verify"
+    echo "./redis-tool status"
+
+    echo "./redis-tool upgrade --target-version 7.2.6 --strategy rolling"
+    ;;
+
+esac

@@ -1,0 +1,2 @@
+---
+- import_playbook: rollback_replicas.yml

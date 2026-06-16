@@ -79,11 +79,13 @@ case "$1" in
 
        ;;
 
+
       *)
 
         echo "Usage:"
         echo "./redis-tool data seed --keys 1000"
         echo "./redis-tool data verify"
+        echo "./redis-tool rollback --target-version 7.0.15"
 
         ;;
 
@@ -145,6 +147,21 @@ status)
   echo "Running Final Verification..."
 
   ./redis-tool data verify | tee output/upgrade_output.txt
+
+  ;;
+
+
+      rollback)
+
+  log_event "ROLLBACK_START"
+
+  echo "Starting Rollback..."
+
+  ansible-playbook \
+  -i $INVENTORY \
+  ansible/playbooks/rollback.yml
+
+  log_event "ROLLBACK_SUCCESS"
 
   ;;
 

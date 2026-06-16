@@ -40,13 +40,9 @@
         make install
 
     - name: Start Redis
-  shell: |
-    pkill redis-server || true
-  /usr/local/bin/redis-server /etc/redis/redis.conf --daemonize yes
-
-    - name: Wait for Redis
-      pause:
-        seconds: 10
+      shell: |
+        pkill redis-server || true
+        /usr/local/bin/redis-server /etc/redis/redis.conf --daemonize yes
 
     - name: Verify Version
       shell: redis-server --version

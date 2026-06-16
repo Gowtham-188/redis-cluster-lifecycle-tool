@@ -1,6 +1,6 @@
 ---
 - name: Upgrade Old Master redis-node-5
-  hosts: redis-node-3
+  hosts: redis-node-2
   become: yes
   gather_facts: no
 

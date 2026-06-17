@@ -1,23 +1,0 @@
-Cluster State:
-redis-node-1 | CHANGED | rc=0 >>
-cluster_state:ok
-
-Node Details
---------------------------------
-redis-node-1 | CHANGED | rc=0 >>
-10.10.0.11:6379 [replica] v7.2.6 replicating: mem:1.90M
---------------------------------
-redis-node-2 | CHANGED | rc=0 >>
-10.10.0.12:6379 [replica] v7.2.6 replicating:10.10.0.16 mem:1.71M
---------------------------------
-redis-node-3 | CHANGED | rc=0 >>
-10.10.0.13:6379 [replica] v7.2.6 replicating:10.10.0.14 mem:1.72M
---------------------------------
-redis-node-4 | CHANGED | rc=0 >>
-10.10.0.14:6379 [replica] v7.2.6 replicating: mem:1.85M
---------------------------------
-redis-node-5 | CHANGED | rc=0 >>
-10.10.0.15:6379 [replica] v7.2.6 replicating:10.10.0.11 mem:1.72M
---------------------------------
-redis-node-6 | CHANGED | rc=0 >>
-10.10.0.16:6379 [replica] v7.2.6 replicating: mem:1.85M
